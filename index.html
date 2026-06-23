@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insta360 X5 Selfie Station</title>
+    <style>
+        /* --- RESETS & GLOBAL LAYOUT --- */
+        *, *::before, *::after { box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f4f7f6;
+            color: #333333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* --- GLOBAL HEADER --- */
+        .global-header {
+            background-color: #002D72;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            z-index: 100;
+
+        }
+
+        .header-inner {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 2rem;
+        }
+
+        .nav-logo {
+            max-height: 15vw;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 650px) {
+            .header-inner {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* --- MAIN WRAPPERS --- */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1200px;
+            padding: 2rem 1rem;
+        }
+        @media (min-width: 1200px) {
+            .content { max-width: 90vw; }
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            border-top: 6px solid #002D72;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- RESPONSIVE GRID LAYOUT --- */
+        .app-layout {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: 1fr;
+            flex: 1;
+        }
+        @media (min-width: 800px) {
+            .app-layout {
+                grid-template-columns: 350px 1fr; 
+                align-items: stretch;
+            }
+            .global-header {
+                position: -webkit-sticky; 
+                position: sticky;
+                top: 0;
+            }
+        }
+        @media (min-width: 1200px) {
+            .app-layout {
+                grid-template-columns: 1fr 3fr; 
+                gap: 3rem; 
+            }
+        }
+
+        /* --- SIDEBAR & HEADINGS --- */
+        .top-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .top-header .header-logo { 
+            max-width: 270px; 
+            margin-bottom: 0.5rem; 
+        }
+        .top-header h1 { 
+            margin: 0; 
+            color: #002D72; 
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .step-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        /* --- MAIN MEDIA VIEW --- */
+        .main-view {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        #placeholderText, #streamSection, #imageContainer {
+            width: 100%;
+            max-width: 90vh; /* Bounds horizontal stretch on massive screens */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #placeholderText {
+            background: #ebf0f5; 
+            border-radius: 8px;
+            aspect-ratio: 1.33 / 1; 
+            padding: 1rem; 
+        }
+
+        #liveStream, #resultImage {
+            width: 100%;
+            height: auto;
+            max-height: 75vh; 
+            object-fit: contain; 
+            border-radius: 4px;
+            border: 0px solid #002D72;
+            background: #000;
+        }
+        #resultImage { border: 1px solid #cccccc; }
+
+        /* --- UI ELEMENTS --- */
+        input[type="email"], button {
+            width: 100%;
+            font-size: clamp(0.875rem, 0.5rem + 1vw, 1.25rem); 
+            padding: clamp(12px, 1vh + 4px, 18px);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        input[type="email"] {
+            width: 100%;
+            /* Lowered the minimum and maximum font sizes */
+            font-size: clamp(0.75rem, 0.4rem + 0.8vw, 1rem); 
+            padding: clamp(12px, 1vh + 4px, 18px);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border: 1px solid #cccccc;
+            
+            /* Forces overflowing text to become '...' */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        input[type="email"]:focus { 
+            border-color: #002D72; 
+            outline: none; 
+            box-shadow: 0 0 0 2px rgba(0,45,114,0.2);
+        }
+        
+        button {
+            background: #002D72;
+            color: #ffffff;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 0.5rem;
+        }
+        button:hover { background: #001f52; }
+        button:disabled { background: #cccccc; color: #666666; cursor: not-allowed; }
+        
+        #disconnectBtn { background: #dc3545; }
+        #disconnectBtn:hover { background: #c82333; }
+        #retakeBtn { background: #6c757d; margin-top: 1rem; }
+        #retakeBtn:hover { background: #5a6268; }
+        
+        .status { 
+            font-size: 0.9rem; 
+            font-weight: 500; 
+            min-height: 1.2rem; 
+            margin-bottom: 0.5rem; 
+            text-align: center; 
+        }
+        .status.success { color: #28a745; }
+        .status.error { color: #dc3545; }
+        .status.working { color: #0056b3; }
+
+        #downloadLink {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #0056b3;
+            text-decoration: none;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        #downloadLink:hover { text-decoration: underline; }
+
+        /* --- OVERLAY --- */
+        #countdownOverlay {
+            display: none; 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.4); 
+            color: #ffffff; 
+            font-size: 6rem; 
+            font-weight: bold; 
+            justify-content: center; 
+            align-items: center; 
+            border-radius: 4px;
+            z-index: 10;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<header class="global-header">
+    <div class="header-inner">
+        <img src="static/utulsaIRA.jpg" alt="University of Tulsa Logo" class="nav-logo">
+        
+        <nav class="nav-links">
+            <a href="https://utulsa.edu/research/robotics-institute" target="_blank">Institute for Robotics & Autonomy</a>
+            <a href="https://l5vel.com" target="_blank">L5vel</a>
+        </nav>
+    </div>
+</header>
+
+<main class="content">
+<div class="container">
+    
+    <div class="top-header">
+        <h1>S-Bot Selfie Station</h1>
+    </div>
+
+    <div class="app-layout">
+        
+        <div class="sidebar">
+            <div class="step-section" id="connectSection">
+                <button id="connectBtn" onclick="connectCamera()">1. Connect to Camera</button>
+                <div id="progressContainer" style="display: none; width: 100%; margin-bottom: 0.5rem; margin-top: 0.5rem;">
+                    <div style="width: 100%; background: #e0e0e0; border-radius: 4px; overflow: hidden; height: 6px;">
+                        <div id="progressBar" style="width: 0%; height: 100%; background: #002D72; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+                <div id="connectStatus" class="status"></div>
+            </div>
+
+            <div class="step-section" id="captureSection" style="border-bottom: none;">
+                <div style="display: flex; gap: 10px;">
+                    <button id="captureBtn" onclick="takeSelfie()" disabled>2. Take Picture</button>
+                    <button id="disconnectBtn" onclick="manualDisconnect()" style="display: none;">Disconnect</button>
+                </div>
+                <div id="captureStatus" class="status"></div>
+            </div>
+            
+            <div id="emailSection" style="display: none; margin-top: 0.5rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0;">
+                <input type="email" id="emailInput" placeholder="Enter email to receive photo">
+                <button id="emailBtn" onclick="sendEmail()">Send via Email</button>
+                <div id="emailStatus" class="status"></div>
+                
+                <a id="downloadLink" download="selfie.jpg" href="#">Download Photo to Device</a>
+                <button id="retakeBtn" onclick="retakeSelfie()">Retake Photo</button>
+            </div>
+        </div>
+
+        <div class="main-view">
+            <div id="placeholderText" style="color: #888; text-align: center;">
+                <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="opacity: 0.5; margin-bottom: 10px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                <p>Connect to the camera to begin</p>
+            </div>
+
+            <div id="streamSection" style="display: none;">
+                <div id="countdownOverlay"></div>
+                <div id="streamLoadingText" style="position: absolute; color: #555; font-weight: 600; font-size: 1.2rem;">
+                    Loading live feed...
+                </div>
+                <img id="liveStream" alt="Camera Live Feed" style="display: none;" 
+                     onload="document.getElementById('streamLoadingText').style.display='none'; this.style.display='block';">            </div>
+
+            <div id="imageContainer" style="display: none;">
+                <img id="resultImage" alt="Your captured selfie">
+            </div>
+        </div>
+
+    </div>
+</div>
+</main>
+
+<script>
+    let currentImagePath = '';
+    let connectionTimeout;
+    const IDLE_TIMEOUT_MS = 180000;
+
+    function setStatus(elementId, message, state = 'working') {
+        const el = document.getElementById(elementId);
+        el.innerText = message;
+        el.className = `status ${state}`;
+    }
+
+    function startIdleTimer() {
+        clearTimeout(connectionTimeout);
+        connectionTimeout = setTimeout(() => {
+            setStatus('captureStatus', 'Session timed out. Disconnecting...', 'error');
+            executeDisconnect();
+        }, IDLE_TIMEOUT_MS);
+    }
+
+    function stopIdleTimer() {
+        clearTimeout(connectionTimeout);
+    }
+
+    async function executeDisconnect(homeArm = false) {
+        stopIdleTimer();
+        
+        document.getElementById('streamSection').style.display = 'none';
+        document.getElementById('imageContainer').style.display = 'none';
+        document.getElementById('placeholderText').style.display = 'flex';
+        document.getElementById('liveStream').src = '';
+        
+        document.getElementById('captureBtn').disabled = true;
+        document.getElementById('disconnectBtn').style.display = 'none';
+        document.getElementById('emailSection').style.display = 'none';
+        document.getElementById('connectBtn').disabled = false;
+
+        try {
+            await fetch(`/disconnect?home_arm=${homeArm}`, { method: 'POST' });
+            setStatus('connectStatus', 'Disconnected from camera.', 'working');
+        } catch (err) {
+            console.error("Disconnect failed", err);
+        }
+    }
+
+    function manualDisconnect() {
+        setStatus('captureStatus', 'Returning arm home and disconnecting...', 'working');
+        executeDisconnect(true);
+    }
+
+
+    // Helper function for the giant visual countdown
+    function runCountdown(seconds) {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('countdownOverlay');
+            overlay.style.display = 'flex'; 
+            overlay.innerText = seconds;
+
+            const interval = setInterval(() => {
+                seconds--;
+                if (seconds > 0) {
+                    overlay.innerText = seconds;
+                } else {
+                    clearInterval(interval);
+                    overlay.style.display = 'none'; 
+                    resolve();
+                }
+            }, 1000);
+        });
+    }
+
+    async function connectCamera() {
+        const btn = document.getElementById('connectBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        
+        btn.disabled = true;
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        setStatus('connectStatus', 'Initializing wake sequence...', 'working');
+
+        // Start polling the backend for live percentage updates
+        const pollingInterval = setInterval(async () => {
+            try {
+                const res = await fetch('/status');
+                const data = await res.json();
+                setStatus('connectStatus', data.message, 'working');
+                progressBar.style.width = data.progress + '%';
+            } catch (err) {
+                // Ignore transient network errors during polling
+            }
+        }, 500);
+
+        try {
+            const res = await fetch('/connect', { method: 'POST' });
+            
+            // Stop polling once the main request finishes
+            clearInterval(pollingInterval);
+            
+            if (!res.ok) throw new Error(await res.text());
+            
+            progressBar.style.width = '100%';
+            setStatus('connectStatus', 'Connected to Camera!', 'success');
+            
+            // Hide the progress bar cleanly after a short delay
+            setTimeout(() => { progressContainer.style.display = 'none'; }, 1000);
+            
+            document.getElementById('placeholderText').style.display = 'none';
+            document.getElementById('streamSection').style.display = 'flex';
+            
+            document.getElementById('liveStream').style.display = 'none';
+            document.getElementById('streamLoadingText').style.display = 'block';
+            
+            document.getElementById('liveStream').src = '/stream?t=' + new Date().getTime();
+            
+            captureBtn.disabled = false;
+            disconnectBtn.style.display = 'block';
+            startIdleTimer(); 
+            
+        } catch (err) {
+            clearInterval(pollingInterval);
+            progressContainer.style.display = 'none';
+            
+            let errorMessage = err.message;
+            try {
+                const parsed = JSON.parse(err.message);
+                if (parsed.detail) errorMessage = parsed.detail;
+            } catch {}
+            setStatus('connectStatus', errorMessage, 'error');
+            btn.disabled = false;
+        }
+    }
+
+    async function takeSelfie() {
+        stopIdleTimer(); 
+        
+        const btn = document.getElementById('captureBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const imgContainer = document.getElementById('imageContainer');
+        const streamSection = document.getElementById('streamSection');
+        const emailSection = document.getElementById('emailSection');
+        
+        btn.disabled = true;
+        disconnectBtn.disabled = true; 
+        imgContainer.style.display = 'none';
+        emailSection.style.display = 'none';
+        
+        setStatus('captureStatus', 'Moving arm into position...', 'working');
+
+        try {
+            //const armRes = await fetch('/position-arm', { method: 'POST' });
+            //if (!armRes.ok) throw new Error(await armRes.text());
+
+            setStatus('captureStatus', 'Get Ready! 3...', 'working');
+            await runCountdown(3);
+
+            streamSection.style.display = 'none';
+            document.getElementById('liveStream').src = '';
+            document.getElementById('placeholderText').style.display = 'flex';
+            document.getElementById('placeholderText').innerHTML = '<h1>Taking photo - Smile!</h1>';
+
+            setStatus('captureStatus', 'Processing photo...', 'working');
+            const res = await fetch('/capture', { method: 'POST' });
+            if (!res.ok) throw new Error(await res.text());
+            
+            const data = await res.json();
+            currentImagePath = data.lan_path; 
+            
+            document.getElementById('placeholderText').style.display = 'none';
+            document.getElementById('resultImage').src = currentImagePath;
+            document.getElementById('downloadLink').href = currentImagePath;
+            document.getElementById('placeholderText').innerHTML = '<p>Camera Disconnected</p>';
+            
+            imgContainer.style.display = 'flex';
+            emailSection.style.display = 'block';
+            
+            setStatus('captureStatus', 'Success!', 'success');
+            
+            disconnectBtn.disabled = false;
+            startIdleTimer(); 
+            
+        } catch (err) {
+            let errorMessage = err.message;
+            try {
+                const parsed = JSON.parse(err.message);
+                if (parsed.detail) errorMessage = parsed.detail;
+            } catch {}
+            setStatus('captureStatus', errorMessage, 'error');
+            
+            document.getElementById('countdownOverlay').style.display = 'none';
+            btn.disabled = false;
+            disconnectBtn.disabled = false;
+        }
+    }
+
+    function retakeSelfie() {
+        document.getElementById('imageContainer').style.display = 'none';
+        document.getElementById('emailSection').style.display = 'none';
+        document.getElementById('captureStatus').innerText = '';
+
+        document.getElementById('streamSection').style.display = 'flex';
+        // Reset the loading state before requesting the new stream
+        document.getElementById('liveStream').style.display = 'none';
+        document.getElementById('streamLoadingText').style.display = 'block';
+        document.getElementById('liveStream').src = '/stream?t=' + new Date().getTime();
+
+        document.getElementById('captureBtn').disabled = false;
+    }
+
+    async function sendEmail() {
+        const btn = document.getElementById('emailBtn');
+        const emailInput = document.getElementById('emailInput');
+        const email = emailInput.value.trim();
+
+        if (!email) {
+            setStatus('emailStatus', 'Please enter a valid email.', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        setStatus('emailStatus', 'Sending...', 'working');
+
+        try {
+            const res = await fetch(`/email?email=${encodeURIComponent(email)}&image=${encodeURIComponent(currentImagePath)}`, { method: 'POST' });
+            if (!res.ok) throw new Error(await res.text());
+
+            setStatus('emailStatus', 'Email sent successfully!', 'success');
+            emailInput.value = ''; 
+        } catch (err) {
+            let errorMessage = err.message;
+            try {
+                const parsed = JSON.parse(err.message);
+                if (parsed.detail) errorMessage = parsed.detail;
+            } catch {}
+            setStatus('emailStatus', errorMessage, 'error');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
