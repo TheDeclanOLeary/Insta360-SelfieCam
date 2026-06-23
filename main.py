@@ -30,7 +30,7 @@ WIFI_PROFILE_NAME = "Insta360"
 WIFI_INTERFACE = "wlx9cefd5f64c06"
 ROBOT_IP = "172.16.0.11"
 CAMERA_ID_HEX = [0x31, 0x33, 0x35, 0x56, 0x59, 0x44]
-GMAIL_USERNAME = "olearyd74@gmail.com"
+GMAIL_USERNAME = "test@example.com"
 
 # Global lock for video streaming
 stream_lock = threading.Lock()
